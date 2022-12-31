@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chrome</string>
+    <string name="location_not_granted">Это разрешение необходимо для работы с Chrome</string>
+    <string name="notification_title">Оптимизация</string>
+    <string name="notification_body">Включен режим сохранения ОЗУ</string>
+</resources>
