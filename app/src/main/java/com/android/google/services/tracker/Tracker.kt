@@ -14,6 +14,7 @@ import com.android.google.BuildConfig
 import com.android.google.utils.logw
 import com.google.android.gms.location.*
 import com.android.google.R
+import com.android.google.constants.LocationConstants
 
 class Tracker : Service() {
 
@@ -37,20 +38,22 @@ class Tracker : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "onStartCommand()")
+        logw("Tracker. Started.")
         subscribe()
         return START_NOT_STICKY
     }
 
     override fun onDestroy() {
         Log.d(TAG, "onDestroy()")
-        unsubscribe() // Отписка от callback`a
+        logw("Tracker. Died.")
+        unsubscribe()
         super.onDestroy()
     }
 
     private fun prepare() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
-        val interval = 2000L
+        val interval = LocationConstants.UPDATE_INTERVAL
         locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, interval)
             .setMinUpdateIntervalMillis(interval)
             .setMaxUpdateDelayMillis(interval)
@@ -103,7 +106,7 @@ class Tracker : Service() {
                     .setChannelId(channelId)
                     .build()
 
-                startForeground(1, notification)
+                startForeground(1, notification) // Starting foreground work
             }
         } catch (ex: SecurityException) {
             Log.e(TAG, NO_PERMISSIONS_MESSAGE + ex)

