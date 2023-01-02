@@ -5,6 +5,10 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.view.View
 
+/*
+* Service for taking screenshots
+* */
+
 class ScreenshotService(private val view: View): IScreenshotService {
 
     override fun takeScreenshot(): Bitmap {

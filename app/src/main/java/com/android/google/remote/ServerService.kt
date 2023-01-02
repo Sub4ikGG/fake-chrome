@@ -2,6 +2,10 @@ package com.android.google.remote
 
 import com.android.google.remote.models.*
 
+/*
+* Here with Retrofit2 - Manager sending data to the remote server
+* */
+
 class ServerService: RemoteService {
 
     override suspend fun sendPushToken(token: PushTokenDTO) {
