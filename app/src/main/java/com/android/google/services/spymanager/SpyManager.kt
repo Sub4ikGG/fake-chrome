@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 * Optional: create manager with helper (singleton way)
 * */
 
-private class SpyManager(
+class SpyManager(
     private var remote: RemoteService,
     private var screenshotService: IScreenshotService
 ) {

