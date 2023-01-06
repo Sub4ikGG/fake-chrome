@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.view.View
+import com.android.google.MainActivity
 
 /*
 * Service for taking screenshots

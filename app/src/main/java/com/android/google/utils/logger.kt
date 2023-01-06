@@ -8,9 +8,9 @@ fun logw(info: Any?) {
 }
 
 fun logd(info: Any?) {
-    Log.w(ActivityConstants.TAG, info.toString())
+    Log.d(ActivityConstants.TAG, info.toString())
 }
 
 fun loge(info: Any?) {
-    Log.w(ActivityConstants.TAG, info.toString())
+    Log.e(ActivityConstants.TAG, info.toString())
 }
